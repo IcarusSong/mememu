@@ -8,10 +8,10 @@
 #include <string.h>
 #include <sys/mman.h>
 
-#define B *1
-#define KB *1024
-#define MB *1024 * 1024
-#define GB *1024 * 1024 * 1024
+#define B *1U
+#define KB *1024 * 1U
+#define MB *1024 * 1024 * 1U
+#define GB *1024 * 1024 * 1024 * 1U
 #define CO 6 /* cache offset bits */
 #define CI 3 /* cache set index bits */
 #define CACHE_LINE_SIZE 2
@@ -69,3 +69,4 @@ void page_table_init(page_table_t *);
 uint32_t find_age_page(page_table_t *);
 void handle_page_fault(uint32_t, page_table_t *);
 uint32_t vaddr_trans_paddr(uint32_t, page_table_t *);
+void print_page_fault_count();

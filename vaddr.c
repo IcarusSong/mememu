@@ -1,10 +1,14 @@
 #include "mmu.h"
+#include <stdint.h>
 
 uint32_t next_free_frame = 0;
+
+int page_fault_count = 0;
 
 void page_table_init(page_table_t *page_table) {
     memset(page_table, 0, sizeof(page_table_t));
 }
+static void read_disk() {}
 
 uint32_t find_age_page(page_table_t *page_table) {
     uint32_t min_age_pos = 0;
@@ -20,6 +24,7 @@ uint32_t find_age_page(page_table_t *page_table) {
 }
 
 void handle_page_fault(uint32_t vaddr, page_table_t *page_table) {
+    page_fault_count++;
     uint32_t vpn = vaddr >> 12;
     if (next_free_frame < FRAME_NUM) {
         page_table->entries[vpn].frame = next_free_frame;
@@ -30,6 +35,7 @@ void handle_page_fault(uint32_t vaddr, page_table_t *page_table) {
             page_table->entries[age_page_pos].frame;
         page_table->entries[age_page_pos].valid = 0;
     }
+    read_disk();
     page_table->entries[vpn].valid = 1;
 }
 
@@ -51,4 +57,7 @@ uint32_t vaddr_trans_paddr(uint32_t vaddr, page_table_t *page_table) {
     ppn = page_table->entries[vpn].frame;
     paddr = (ppn << 12) | vpo;
     return paddr;
+}
+void print_page_fault_count() {
+    printf("page_fault_count : %d    ", page_fault_count);
 }
