@@ -33,16 +33,19 @@ void cache_visit(uint32_t p_addr, cache_t *cache) {
 
     bool miss = true;
     visit_count++;
+    printf("paddr: %08x in set%d : ", p_addr, set_index);
     for (int i = 0; i < CACHE_LINE_SIZE; i++) {
-        // printf("%d\n", i);
+        printf("%d\n", i);
         if (tag == cache->set[set_index].cache_line[i].tag &&
             cache->set[set_index].cache_line[i].valid == 1) {
+            printf("cache hit on line%d\n", i);
             miss = false;
             hit_count++;
             break;
         }
     }
     if (miss) {
+        printf("cache miss\n");
         miss_count++;
         cache_miss(p_addr, cache);
     }
