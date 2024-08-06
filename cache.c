@@ -11,17 +11,16 @@ void cache_miss(uint32_t p_addr, cache_t *cache) {
     uint32_t tag = p_addr >> (CO + CI);
     uint32_t set_index = (p_addr >> CO) & ((1U << CI) - 1);
     int min_age_pos = 0;
-    uint32_t min_age = cache->set[set_index].cache_line[0].age;
+    uint8_t min_age = cache->set[set_index].cache_line[0].age;
     for (int i = 0; i < CACHE_LINE_SIZE; i++) {
-        uint32_t age = cache->set[set_index].cache_line[i].age;
-        // printf("set: %d, i: %d, age: %u\n", set_index, i, age);
+        uint8_t age = cache->set[set_index].cache_line[i].age;
         if (age < min_age) {
             min_age = age;
             min_age_pos = i;
         }
         cache->set[set_index].cache_line[i].age >>= 1;
     }
-    cache->set[set_index].cache_line[min_age_pos].age |= 0xf0000000;
+    cache->set[set_index].cache_line[min_age_pos].age |= 0xf0;
     cache->set[set_index].cache_line[min_age_pos].tag = tag;
     cache->set[set_index].cache_line[min_age_pos].valid = 1;
 }
@@ -33,36 +32,28 @@ void cache_visit(uint32_t p_addr, cache_t *cache) {
 
     bool miss = true;
     visit_count++;
-    printf("paddr: %08x in set%d : ", p_addr, set_index);
     for (int i = 0; i < CACHE_LINE_SIZE; i++) {
-        printf("%d\n", i);
         if (tag == cache->set[set_index].cache_line[i].tag &&
             cache->set[set_index].cache_line[i].valid == 1) {
-            printf("cache hit on line%d\n", i);
             miss = false;
             hit_count++;
             break;
         }
     }
     if (miss) {
-        printf("cache miss\n");
         miss_count++;
         cache_miss(p_addr, cache);
     }
 }
-
 void cache_print(cache_t *cache) {
     for (int i = 0; i < SET_SIZE; i++) {
-        printf("set %d:\n", i);
+        printf("set %d:  ", i);
         for (int j = 0; j < CACHE_LINE_SIZE; j++) {
-            printf("line %d: tag : %08x vaild: %d  age: %u   ", j,
+            printf("line %d: tag : %08x vaild: %d    ", j,
                    cache->set[i].cache_line[j].tag,
-                   cache->set[i].cache_line[j].valid,
-                   cache->set[i].cache_line[j].age);
-            if (j % 2 == 1) {
-                printf("\n");
-            }
+                   cache->set[i].cache_line[j].valid);
         }
+        printf("\n");
     }
 }
 
